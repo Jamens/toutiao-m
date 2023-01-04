@@ -1,23 +1,44 @@
 <template>
   <div class="login-container">
     <van-nav-bar title="登录" />
-    <van-form @submit="onSubmit">
+    <van-form ref="loginForm" @submit="onSubmit">
       <van-cell-group inset>
         <van-field
+          clearable
+          clear-trigger
           v-model="user.mobile"
-          name="用户名"
+          name="mobile"
           placeholder="请输入手机号"
-          :rules="[{ required: true, message: '请填写手机号' }]"
+          :rules="userFormRules.mobile"
+          type="number"
+          maxlength="11"
           ><i slot="left-icon" class="toutiao toutiao-shouji"></i
         ></van-field>
         <van-field
+          clearable
+          clear-trigger
           v-model="user.code"
-          name="密码"
+          name="code"
           placeholder="请输入验证码"
-          :rules="[{ required: true, message: '请填写验证码' }]"
+          :rules="userFormRules.code"
+          type="number"
+          maxlength="6"
         >
           <template #button>
-            <van-button round class="send-sms-btn" size="small" type="default"
+            <van-count-down
+              @finish="isCountDownShow = false"
+              v-if="isCountDownShow"
+              :time="1000 * 60"
+              format="ss s"
+            />
+            <van-button
+              v-else
+              @click="onSendMsg"
+              round
+              class="send-sms-btn"
+              size="small"
+              type="default"
+              native-type="button"
               >发送验证码</van-button
             >
           </template>
@@ -33,16 +54,30 @@
   </div>
 </template>
 <script>
-import { login } from "@/api/user";
+import { login, sendSms } from "@/api/user";
 export default {
   name: "LoginPage",
   components: {},
   props: {},
   data() {
     return {
+      isCountDownShow: false,
+      userFormRules: {
+        mobile: [
+          { required: true, message: "请输入手机号" },
+          { pattern: /^1[3|5|7|8]\d{9}$/, message: "手机号格式错误" },
+        ],
+        code: [
+          { required: true, message: "请输入验证码" },
+          // {
+          //   pattern: /^d{6}$/,
+          //   message: "验证码格式错误",
+          // },
+        ],
+      },
       user: {
-        mobile: "",
-        code: "",
+        mobile: "18666135290",
+        code: "246810",
       },
     };
   },
@@ -51,15 +86,47 @@ export default {
   created() {},
   mounted() {},
   methods: {
+    async onSendMsg() {
+      console.log("sssss");
+      try {
+        await this.$refs.loginForm.validate("mobile");
+        console.log("通过");
+      } catch (error) {
+        return console.log(error);
+      }
+      this.isCountDownShow = true;
+      try {
+        const res = await sendSms(this.user.mobile);
+        console.log("res", res);
+        this.$toast.success("发送成功");
+      } catch (error) {
+        this.isCountDownShow = false;
+        if (error.response.status == 429) {
+          this.$toast.fail("发送太频繁");
+        } else {
+          this.$toast.fail("发送失败");
+        }
+        console.log(error);
+      }
+    },
     async onSubmit() {
       const user = this.user;
+      // eslint-disable-next-line no-undef
+      this.$toast.loading({
+        message: "登录中...",
+        forbidClick: true,
+        duration: 0,
+      });
       try {
-        const res = await login(user);
-        console.log(res);
+        const { data } = await login(user);
+        this.$store.commit("setUser", data.data);
+        this.$toast.success("登陆成功");
       } catch (error) {
         if (error.response.status === 400) {
+          this.$toast.fail("手机号验证码错误");
           console.log("手机号验证码错误");
         } else {
+          this.$toast.fail("登陆失败，稍后重试");
           console.log("登陆失败，稍后重试", error);
         }
         console.log(error);
