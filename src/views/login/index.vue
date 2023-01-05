@@ -1,6 +1,8 @@
 <template>
   <div class="login-container">
-    <van-nav-bar title="登录" />
+    <van-nav-bar title="登录">
+      <van-icon slot="left" name="cross" @click="$router.back()" />
+    </van-nav-bar>
     <van-form ref="loginForm" @submit="onSubmit">
       <van-cell-group inset>
         <van-field
@@ -121,6 +123,7 @@ export default {
         const { data } = await login(user);
         this.$store.commit("setUser", data.data);
         this.$toast.success("登陆成功");
+        this.$router.back();
       } catch (error) {
         if (error.response.status === 400) {
           this.$toast.fail("手机号验证码错误");
