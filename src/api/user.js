@@ -21,3 +21,16 @@ export const getUserInfo = () => {
     // },
   });
 };
+export const getUserChannels = () => {
+  return request({
+    method: "GET",
+    url: "/v1_0/channels",
+  });
+};
+
+export const getUserArticles = () => {
+  return request({
+    method: "GET",
+    url: "/v1_0/articles",
+  });
+};
