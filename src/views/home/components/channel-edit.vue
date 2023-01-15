@@ -2,19 +2,30 @@
   <div class="channel-edit">
     <van-cell :border="false">
       <div slot="title" class="title-text">我的频道</div>
-      <van-button class="edit-btn" type="danger" plain round size="mini"
-        >编辑</van-button
+      <van-button
+        class="edit-btn"
+        type="danger"
+        plain
+        round
+        size="mini"
+        @click="isEdit = !isEdit"
+        >{{ isEdit ? "完成" : "编辑" }}</van-button
       >
     </van-cell>
     <van-grid class="my-grid" :gutter="10">
       <van-grid-item
-        icon="clear"
         class="grid-item"
-        v-for="(channels, i) in myChannels"
+        v-for="(channel, i) in myChannels"
         :key="i"
+        @click="onMyChannelClick(channel, i)"
       >
+        <van-icon
+          v-show="isEdit && !fiexdChannels.includes(channel.id)"
+          slot="icon"
+          name="clear"
+        ></van-icon>
         <span class="text" :class="{ active: i === active }" slot="text">{{
-          channels.name
+          channel.name
         }}</span>
       </van-grid-item>
     </van-grid>
@@ -26,14 +37,22 @@
       <van-grid-item
         icon="plus"
         class="grid-item"
-        v-for="value in 8"
-        :key="value"
-        text="文字大大大大"
+        v-for="(channel, i) in recommendChannels"
+        :key="i"
+        :text="channel.name"
+        @click="onAllChannel(channel)"
       />
     </van-grid>
   </div>
 </template>
 <script>
+import {
+  getAllChannels,
+  addUserChannel,
+  deleteUserChannel,
+} from "@/api/channel";
+import { mapState } from "vuex";
+import { setItem } from "@/utils/storage";
 export default {
   name: "ChannelEdit",
   props: {
@@ -47,9 +66,90 @@ export default {
     },
   },
   data() {
-    return {};
+    return {
+      allChannels: [],
+      isEdit: false,
+      fiexdChannels: [0],
+    };
   },
-  methods: {},
+  created() {
+    this.loadAllChannels();
+  },
+  computed: {
+    ...mapState(["user"]),
+    recommendChannels() {
+      return this.allChannels.filter((channel) => {
+        return !this.myChannels.find((myChannel) => {
+          return myChannel.id === channel.id;
+        });
+      });
+    },
+    // recommendChannels() {
+    //   const channels = [];
+    //   this.allChannels.forEach((channel) => {
+    //     const ret = this.myChannels.find((myChannel) => {
+    //       return myChannel.id === channel.id;
+    //     });
+    //     if (!ret) {
+    //       channels.push(channel);
+    //     }
+    //   });
+    //   return channels;
+    // },
+  },
+  methods: {
+    async loadAllChannels() {
+      try {
+        const { data } = await getAllChannels();
+        console.log(data);
+        this.allChannels = data.data.channels;
+      } catch (error) {
+        this.$$toast.error("数据获取失败", error);
+      }
+    },
+    async onAllChannel(channel) {
+      // eslint-disable-next-line vue/no-mutating-props
+      this.myChannels.push(channel);
+      if (this.user) {
+        try {
+          console.log(channel);
+          await addUserChannel({
+            id: channel.id,
+            seq: this.myChannels.length,
+          });
+        } catch (error) {
+          this.$$toast.error("保存失败");
+        }
+      } else {
+        setItem("TOUTIAO_CHANNELS", this.myChannels);
+      }
+      // eslint-disable-next-line vue/no-mutating-props
+    },
+    onMyChannelClick(channel, i) {
+      console.log(channel, i);
+      if (this.isEdit) {
+        if (this.fiexdChannels.includes(i)) {
+          return;
+        }
+        if (i <= this.active) {
+          this.$emit("updata", this.active - 1, true);
+        }
+        // eslint-disable-next-line vue/no-mutating-props
+        this.myChannels.splice(i, 1);
+        this.deleteChannel(channel);
+      } else {
+        this.$emit("updata", i, false);
+      }
+    },
+    async deleteChannel(channel) {
+      if (this.user) {
+        deleteUserChannel(channel.id);
+      } else {
+        console.log("测试");
+        setItem("TOUTIAO_CHANNELS", this.myChannels);
+      }
+    },
+  },
 };
 </script>
 <style lang="less" scoped>
@@ -80,6 +180,9 @@ export default {
       }
       .active {
         color: red;
+      }
+      .van-grid-item__icon-wrapper {
+        position: unset;
       }
     }
   }

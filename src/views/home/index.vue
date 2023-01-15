@@ -37,7 +37,11 @@
       position="bottom"
       :style="{ height: '100%' }"
     >
-      <channel-edit :myChannels="channels" :active="active"></channel-edit>
+      <channel-edit
+        @updata="onUpdata"
+        :myChannels="channels"
+        :active="active"
+      ></channel-edit>
     </van-popup>
   </div>
 </template>
@@ -45,6 +49,8 @@
 import ChannelEdit from "./components/channel-edit";
 import { getUserChannels } from "@/api/user";
 import ArticleList from "./components/article-list";
+import { mapState } from "vuex";
+import { getItem } from "@/utils/storage";
 export default {
   name: "HomeIndex",
   components: { ArticleList, ChannelEdit },
@@ -57,13 +63,34 @@ export default {
   methods: {
     async loadChannels() {
       try {
-        const { data } = await getUserChannels();
-        this.channels = data.data.channels;
-        console.log(data);
+        let channels = [];
+        if (this.user) {
+          const { data } = await getUserChannels();
+          channels = data.data.channels;
+        } else {
+          const localChannels = getItem("TOUTIAO_CHANNELS");
+          if (localChannels) {
+            channels = localChannels;
+          } else {
+            const { data } = await getUserChannels();
+            channels = data.data.channels;
+          }
+        }
+        this.channels = channels;
+        // const { data } = await getUserChannels();
+        // this.channels = data.data.channels;
       } catch (error) {
         this.$toast.fail("获取频道失败");
       }
     },
+    onUpdata(i, isChennelEditShow = true) {
+      console.log(i);
+      this.active = i;
+      this.isChennelEditShow = isChennelEditShow;
+    },
+  },
+  computed: {
+    ...mapState["user"],
   },
 };
 </script>
