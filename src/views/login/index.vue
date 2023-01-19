@@ -100,13 +100,13 @@ export default {
       try {
         const res = await sendSms(this.user.mobile);
         console.log("res", res);
-        this.$toast.success("发送成功");
+        this.$toast("发送成功");
       } catch (error) {
         this.isCountDownShow = false;
         if (error.response.status == 429) {
-          this.$toast.fail("发送太频繁");
+          this.$toast("发送太频繁");
         } else {
-          this.$toast.fail("发送失败");
+          this.$toast("发送失败");
         }
         console.log(error);
       }
@@ -126,10 +126,10 @@ export default {
         this.$router.back();
       } catch (error) {
         if (error.response.status === 400) {
-          this.$toast.fail("手机号验证码错误");
+          this.$toast("手机号验证码错误");
           console.log("手机号验证码错误");
         } else {
-          this.$toast.fail("登陆失败，稍后重试");
+          this.$toast("登陆失败，稍后重试");
           console.log("登陆失败，稍后重试", error);
         }
         console.log(error);

@@ -8,6 +8,7 @@
         round
         size="small"
         type="info"
+        to="/search"
         >搜索</van-button
       >
     </van-nav-bar>
@@ -80,7 +81,7 @@ export default {
         // const { data } = await getUserChannels();
         // this.channels = data.data.channels;
       } catch (error) {
-        this.$toast.fail("获取频道失败");
+        this.$toast("获取频道失败");
       }
     },
     onUpdata(i, isChennelEditShow = true) {

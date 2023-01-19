@@ -96,7 +96,7 @@ export default {
           this.list[3].count = data.data.like_count;
         }
       } catch (error) {
-        this.$toast.fail("获取数据失败");
+        this.$toast("获取数据失败");
       }
     },
     onLogout() {
