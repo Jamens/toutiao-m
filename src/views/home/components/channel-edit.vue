@@ -104,7 +104,7 @@ export default {
         console.log(data);
         this.allChannels = data.data.channels;
       } catch (error) {
-        this.$$toast.error("数据获取失败", error);
+        this.$toast("数据获取失败", error);
       }
     },
     async onAllChannel(channel) {

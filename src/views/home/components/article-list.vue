@@ -79,7 +79,7 @@ export default {
       } catch (error) {
         this.error = true;
         this.loading = false;
-        this.$toast.fail("请求失败");
+        this.$toast("请求失败");
       }
     },
     async onRefresh() {
@@ -95,7 +95,7 @@ export default {
       } catch (error) {
         console.log(error);
         this.refreshSuccessText = "刷新失败";
-        this.$toast.fail("刷新失败");
+        this.$toast("刷新失败");
         this.isLoading = false;
       }
     },
