@@ -1,7 +1,17 @@
 import axios from "axios";
 import store from "@/store";
+import JSONBigint from "json-bigint";
 const request = axios.create({
   baseURL: "http://toutiao.itheima.net/",
+  transformResponse: [
+    function (data) {
+      try {
+        return JSONBigint.parse(data);
+      } catch (error) {
+        return data;
+      }
+    },
+  ],
 });
 request.interceptors.request.use(
   function (config) {
