@@ -43,14 +43,12 @@ export default {
     async loadSearchSuggestions(value) {
       try {
         const { data } = await getSearchSuggestion(value);
-        console.log(data);
         this.suggestions = data.data.options;
       } catch (error) {
         this.$toast("数据获取失败");
       }
     },
     hightlight(text) {
-      console.log("xxxxxxxxxxx", text);
       const hightlight = `<span class="active">${this.searchText}</span>`;
       const reg = new RegExp(this.searchText, "gi");
       return text.replace(reg, hightlight);
