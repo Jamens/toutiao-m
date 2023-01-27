@@ -78,7 +78,7 @@ export default {
         ],
       },
       user: {
-        mobile: "18666135290",
+        mobile: "12345678",
         code: "246810",
       },
     };
@@ -89,7 +89,6 @@ export default {
   mounted() {},
   methods: {
     async onSendMsg() {
-      console.log("sssss");
       try {
         await this.$refs.loginForm.validate("mobile");
         console.log("通过");

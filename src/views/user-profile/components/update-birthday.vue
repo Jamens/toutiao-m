@@ -32,11 +32,9 @@ export default {
   },
   methods: {
     changeBirthday(v) {
-      console.log("zzzzzzzzzzzzz", v);
       this.currentDate = v;
     },
     async confirmBirthday() {
-      console.log("zzzzzzzzzzzzz", this.currentDate);
       this.$toast.loading({
         message: "保存中",
         forbidClick: true,

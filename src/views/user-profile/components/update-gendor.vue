@@ -33,7 +33,6 @@ export default {
       this.localGender = index;
     },
     async onConfirm() {
-      console.log("ssssss", this.propSex);
       this.$toast.loading({
         message: "保存中",
         forbidClick: true,
